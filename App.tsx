@@ -1,20 +1,58 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { INITIAL_EXPENSES } from './src/data/initialExpenses';
+import { ExpensesScreen } from './src/screens/ExpensesScreen';
+import { ReviewReceiptScreen } from './src/screens/ReviewReceiptScreen';
+import { Expense, ExtractedReceipt } from './src/types/expense';
+import { formatCurrency } from './src/utils/currency';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+interface PendingReview {
+  receipt: ExtractedReceipt;
+  imageUri: string;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  const [expenses, setExpenses] = useState<Expense[]>(INITIAL_EXPENSES);
+  const [pendingReview, setPendingReview] = useState<PendingReview | null>(
+    null
+  );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleReceiptExtracted = (
+    receipt: ExtractedReceipt,
+    imageUri: string
+  ) => {
+    setSuccessMessage(null);
+    setPendingReview({ receipt, imageUri });
+  };
+
+  const handleConfirmSave = (newExpense: Expense) => {
+    setExpenses((prev) => [newExpense, ...prev]);
+    setPendingReview(null);
+    setSuccessMessage(
+      `Saved ${newExpense.merchant} (${formatCurrency(newExpense.amountInCents)})`
+    );
+  };
+
+  return (
+    <SafeAreaProvider>
+      <StatusBar style="dark" />
+      {pendingReview ? (
+        <ReviewReceiptScreen
+          initialReceipt={pendingReview.receipt}
+          imageUri={pendingReview.imageUri}
+          onBack={() => setPendingReview(null)}
+          onConfirmSave={handleConfirmSave}
+        />
+      ) : (
+        <ExpensesScreen
+          expenses={expenses}
+          successMessage={successMessage}
+          onDismissSuccess={() => setSuccessMessage(null)}
+          onReceiptExtracted={handleReceiptExtracted}
+        />
+      )}
+    </SafeAreaProvider>
+  );
+}
