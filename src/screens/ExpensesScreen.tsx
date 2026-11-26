@@ -15,10 +15,7 @@ import { BottomNavigation } from '../components/BottomNavigation';
 import { ExpenseCard } from '../components/ExpenseCard';
 import { ScanningModal } from '../components/ScanningModal';
 import { COLORS, RADIUS, SPACING } from '../constants/theme';
-import {
-  extractReceiptFromImage,
-  ExtractReceiptOptions,
-} from '../services/receiptExtractionService';
+import { extractReceiptFromImage } from '../services/receiptExtractionService';
 import {
   BottomTabKey,
   Expense,
@@ -42,14 +39,11 @@ export function ExpensesScreen({
   const [scanningImageUri, setScanningImageUri] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  const processReceiptImage = async (
-    imageUri: string,
-    options?: ExtractReceiptOptions
-  ) => {
+  const processReceiptImage = async (imageUri: string) => {
     setScanningImageUri(imageUri);
     setIsScanning(true);
     try {
-      const extracted = await extractReceiptFromImage(imageUri, options);
+      const extracted = await extractReceiptFromImage(imageUri);
       onReceiptExtracted(extracted, imageUri);
     } catch {
       Alert.alert(
@@ -75,16 +69,12 @@ export function ExpensesScreen({
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.75,
-      base64: true,
+      quality: 0.8,
     });
 
     const asset = !result.canceled ? result.assets[0] : undefined;
     if (asset?.uri) {
-      await processReceiptImage(asset.uri, {
-        base64: asset.base64 ?? undefined,
-        mimeType: asset.mimeType ?? undefined,
-      });
+      await processReceiptImage(asset.uri);
     }
   };
 
@@ -100,16 +90,12 @@ export function ExpensesScreen({
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: false,
-      quality: 0.75,
-      base64: true,
+      quality: 0.8,
     });
 
     const asset = !result.canceled ? result.assets[0] : undefined;
     if (asset?.uri) {
-      await processReceiptImage(asset.uri, {
-        base64: asset.base64 ?? undefined,
-        mimeType: asset.mimeType ?? undefined,
-      });
+      await processReceiptImage(asset.uri);
     }
   };
 

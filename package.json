@@ -7,6 +7,7 @@
     "expo": "~58.0.26",
     "expo-image-picker": "~58.0.10",
     "expo-status-bar": "~58.0.5",
+    "expo-updates": "~58.0.22",
     "react": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1"
@@ -19,7 +20,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --ignoreConfig src/utils/__tests__/receiptLogic.test.ts --outDir .test-dist --module commonjs --target es2020 --esModuleInterop --strict && node .test-dist/utils/__tests__/receiptLogic.test.js"
   },
   "private": true
 }
